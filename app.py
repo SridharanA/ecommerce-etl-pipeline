@@ -63,7 +63,7 @@ def main():
     if st.checkbox('Show seller information'):
         st.write("## Seller Information")
         for index, row in merged_df.iterrows():
-            st.image(row['picture'], caption=row['name'], width=100, use_column_width=False)
+            st.image(row['picture'], caption=row['name'], width=100, use_container_width=False)
             st.write(f"Name: {row['name']}")
             st.write(f"Email: {row['email']}")
             st.write(f"Location: {row['city']}, {row['country']}")
