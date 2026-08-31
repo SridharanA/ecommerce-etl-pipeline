@@ -58,12 +58,12 @@ def main():
     if st.checkbox('Show product images'):
         st.write("## Product Images")
         for index, row in merged_df.iterrows():
-            st.image(row['image'], caption=row['title'], width=100, use_column_width=False)
+            st.image(row['image'], caption=row['title'], width='stretch')
 
     if st.checkbox('Show seller information'):
         st.write("## Seller Information")
         for index, row in merged_df.iterrows():
-            st.image(row['picture'], caption=row['name'], width=100, use_container_width=False)
+            st.image(row['picture'], caption=row['name'], width='stretch')
             st.write(f"Name: {row['name']}")
             st.write(f"Email: {row['email']}")
             st.write(f"Location: {row['city']}, {row['country']}")
