@@ -54,7 +54,7 @@ jobs:
       # CD_PHASE: Update Kubeconfig & Deploy image to EKS
       - name: Update the kubeconfig
         run: |
-          aws eks update-config --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
           
       - name: Substitute Environment Variables and Deploy Manifests
         env:
