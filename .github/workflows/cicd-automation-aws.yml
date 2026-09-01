@@ -69,10 +69,7 @@ jobs:
           sed "s|ECR_IMAGE_PLACEHOLDER|${FULL_IMAGE}|g" deployment.yml | kubectl apply -f -
           
           # Apply service manifest
-          kubectl apply -f service.yml
-          
-          # 2. Update the running container image to the new commit SHA
-          kubectl set image deployment/ecommerce-deployment ecommerce-container=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          kubectl apply -f service.ymlG
         
       - name: Rollout Status
         run: |
