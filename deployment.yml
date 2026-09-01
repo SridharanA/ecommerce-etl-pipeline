@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ecommerce-etl-pipeline-deployment
+  labels:
+    app: myapp
 spec:
   replicas: 2
   selector:
@@ -13,11 +15,14 @@ spec:
         app: myapp
     spec:
       containers:
-      - name: myapp
-        image: dharansri534/ecommerce-etl-pipeline
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        ports:
-        - containerPort: 8501
+        - name: myapp
+          image: ECR_IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 8501
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"

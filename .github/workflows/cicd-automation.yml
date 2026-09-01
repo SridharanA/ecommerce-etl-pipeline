@@ -51,5 +51,5 @@ jobs:
 
       - name: set the deployment.yml(to run container in pods), service.yml(for load balancer to pods)
         run: |
-          kubectl apply -f deployment.yml
-          kubectl apply -f service.yml
+          kubectl apply -f old-deployment.yml
+          kubectl apply -f old-service.yml

@@ -1,0 +1,79 @@
+name: ecommerce-cicd-etl-automation-aws
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-south-2
+  ECR_REPOSITORY: first-ecr-repo/ecommerce-etl-repo   # namespace/ecr-repo-name
+  EKS_CLUSTER_NAME: my-k8s-cluster
+
+jobs:
+  ci-cd-pipeline-job:
+    name: CI_PHASE-build and push image to AWS ECR + CD_PHASE-Deploy image to EKS
+    runs-on: ubuntu-latest
+
+    steps:
+      # CI_PHASE: build and push image to AWS ECR
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Authenticate to AWS using OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::829182232509:role/Github-Actions-ECR-Role
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: build + push image to Amazon ECR Repository
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}   # uses the github commit SHA as an immutable tag for the docker image to be stored in Amazon ECR
+        run: |
+          # Build the container and tag it with both tags -> 'github commit hash (SHA)' and 'latest' -> using double tags because SHA - can be used for production deployments and if fault comes we can go rollback to previous github commits using SHAs and lastest is for testing environment
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .    # double tagging a single image
+
+          # Pushing both tags to Amazon ECR Registry
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      
+      # CD_PHASE: Update Kubeconfig & Deploy image to EKS
+      - name: Update the kubeconfig
+        run: |
+          aws eks update-config --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+          
+      - name: Substitute Environment Variables and Deploy Manifests
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          FULL_IMAGE="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          echo "Deploying image: ${FULL_IMAGE}"
+
+          # Replace placeholder with full ECR image URI and apply
+          sed "s|ECR_IMAGE_PLACEHOLDER|${FULL_IMAGE}|g" deployment.yml | kubectl apply -f -
+          
+          # Apply service manifest
+          kubectl apply -f service.yml
+          
+          # 2. Update the running container image to the new commit SHA
+          kubectl set image deployment/ecommerce-deployment ecommerce-container=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        
+      - name: Rollout Status
+        run: |
+          kubectl rollout status deployment/ecommerce-deployment --timeout=120s

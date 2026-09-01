@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: ecommerce-etl-pipeline-service
 spec:
+  type: LoadBalancer
   selector:
     app: myapp
   ports:
-  - port: 8000
-    targetPort: 8501
-  type: LoadBalancer
+    - name: http
+      protocol: TCP
+      port: 80         # Standard web port exposed by AWS Load Balancer
+      targetPort: 8501 # Application container port
