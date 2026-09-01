@@ -73,4 +73,4 @@ jobs:
         
       - name: Rollout Status
         run: |
-          kubectl rollout status deployment/ecommerce-deployment --timeout=120s
+          kubectl rollout status deployment/ecommerce-etl-pipeline-deployment --timeout=120s
