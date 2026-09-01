@@ -2,12 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ecommerce-etl-pipeline-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: classic
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-0dc656101a8e25c27, subnet-0abe144e646670c00, subnet-0f094ada84ad319ae"
 spec:
   type: LoadBalancer
   selector:
     app: myapp
   ports:
-    - name: http
-      protocol: TCP
-      port: 80         # Standard web port exposed by AWS Load Balancer
-      targetPort: 8501 # Application container port
+    - protocol: TCP
+      port: 80
+      targetPort: 8501
