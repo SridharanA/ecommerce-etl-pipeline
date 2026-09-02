@@ -27,6 +27,8 @@ This is a project for CI/CD automation of ETL pipeline using GitHub Actions CI/C
 
 ![Apps Image](images/app-image.png)
 
+deployment link -> http://k8s-default-ecommerc-11d52b9d07-bce751d49d2d1556.elb.ap-south-2.amazonaws.com
+
 ## Project Deployment Images (AWS - CloudWatch -> logs & dashboard - imgs)
 
 1. cluster logs - from cloudwatch
